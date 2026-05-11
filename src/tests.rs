@@ -344,6 +344,91 @@ fn malformed_inputs_and_hash_domain_separation() {
     );
 }
 
+#[test]
+#[ignore]
+fn debug_request_challenge_variants() {
+    use crate::protocol::credential_request_statement;
+    use sha3::digest::{ExtendableOutput, Update, XofReader};
+
+    let statement = credential_request_statement(elem(vectors::M1_ENC), elem(vectors::M2_ENC)).unwrap();
+    let proof = hx(vectors::REQUEST_PROOF);
+    let challenge = scalar_from_bytes(&proof[..NS]).unwrap();
+    let responses: Vec<_> = proof[NS..]
+        .chunks_exact(NS)
+        .map(|chunk| scalar_from_bytes(chunk).unwrap())
+        .collect();
+    let mapped = statement.map(&responses).unwrap();
+    let image = statement.image().unwrap();
+    let commitment: Vec<_> = mapped
+        .into_iter()
+        .zip(image)
+        .map(|(mapped, image)| mapped - image.mul(challenge))
+        .collect();
+    let commitment_bytes = crate::group::serialize_elements(&commitment).unwrap();
+    let label = statement.instance_label().unwrap();
+    eprintln!("commitment={}", hex::encode(&commitment_bytes));
+    eprintln!("label={}", hex::encode(&label));
+    let session = [CONTEXT_STRING, b"CredentialRequest"].concat();
+    let protocol_id = b"sigma-proofs_Shake128_P256".as_slice();
+
+    fn init(iv_label: &[u8]) -> Shake128 {
+        let mut iv = [0u8; 64];
+        iv[..iv_label.len()].copy_from_slice(iv_label);
+        let mut block = [0u8; 168];
+        block[..64].copy_from_slice(&iv);
+        let mut h = Shake128::default();
+        h.update(&block);
+        h
+    }
+    fn squeeze(state: &Shake128, len: usize) -> Vec<u8> {
+        let mut reader = state.clone().finalize_xof();
+        let mut out = vec![0u8; len];
+        reader.read(&mut out);
+        out
+    }
+    fn fold(bytes: &[u8]) -> Scalar {
+        let mut scalar = Scalar::ZERO;
+        for byte in bytes {
+            scalar = scalar * Scalar::from(256u64) + Scalar::from(*byte as u64);
+        }
+        scalar
+    }
+    fn check(name: &str, mut state: Shake128, commitment_bytes: &[u8], expected: Scalar) {
+        state.update(commitment_bytes);
+        for len in [48usize, 64] {
+            let got = fold(&squeeze(&state, len));
+            eprintln!("{name} len={len} {}", hex::encode(scalar_to_bytes(got)));
+            if got == expected {
+                eprintln!("MATCH {name} len={len}");
+            }
+        }
+    }
+
+    let mut session_state = init(b"fiat-shamir/session-id");
+    session_state.update(&session);
+    let session_digest = squeeze(&session_state, 32);
+    let mut session_id = [0u8; 64];
+    session_id[32..].copy_from_slice(&session_digest);
+
+    let mut current = init(protocol_id);
+    current.update(&session_id);
+    current.update(&label);
+    check("current", current, &commitment_bytes, challenge);
+
+    let mut direct_session = init(protocol_id);
+    direct_session.update(&session);
+    direct_session.update(&label);
+    check("direct_session", direct_session, &commitment_bytes, challenge);
+
+    let mut no_label = init(protocol_id);
+    no_label.update(&session_id);
+    check("no_label", no_label, &commitment_bytes, challenge);
+
+    let mut no_session = init(protocol_id);
+    no_session.update(&label);
+    check("no_session", no_session, &commitment_bytes, challenge);
+}
+
 fn assert_presentation_matches(presentation: &Presentation, expected: &ExpectedPresentation) {
     assert_element_eq(presentation.u, expected.u);
     assert_element_eq(presentation.u_prime_commit, expected.u_prime_commit);
