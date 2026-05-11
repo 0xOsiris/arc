@@ -1,6 +1,6 @@
 use rand_core::{CryptoRng, Error as RandError, RngCore};
-use sha3::digest::{ExtendableOutput, Update, XofReader};
 use sha3::Shake128;
+use sha3::digest::{ExtendableOutput, Update, XofReader};
 
 use crate::*;
 
@@ -131,8 +131,7 @@ fn deterministic_flow_matches_draft_vectors() {
     assert_element_eq(credential.u_prime, vectors::U_PRIME);
     assert_element_eq(credential.x1, vectors::CREDENTIAL_X1);
 
-    let mut state =
-        PresentationState::new(credential, vectors::PRESENTATION_CONTEXT, 2).unwrap();
+    let mut state = PresentationState::new(credential, vectors::PRESENTATION_CONTEXT, 2).unwrap();
     let (nonce_1, presentation_1) = state.present(&mut rng).unwrap();
     assert_eq!(nonce_1, 0);
     assert_presentation_matches(&presentation_1, &vectors::P1);
@@ -367,14 +366,10 @@ mod vectors {
     pub const REQUEST_CONTEXT: &[u8] = b"test request context";
     pub const PRESENTATION_CONTEXT: &[u8] = b"test presentation context";
 
-    pub const X0_SECRET: &str =
-        "1008f2c706ae2157c75e41b2d75695c7bf480d0632a1ef447036cafe4cabb021";
-    pub const X1_SECRET: &str =
-        "526e009578f6f25fdec992343f09f5e6c58489c31fcf8a934bbaf85797121bdd";
-    pub const X2_SECRET: &str =
-        "549075ccd3d1c36b3546725c43e71943414409a23b980b2c47a3fc2b9c37679b";
-    pub const XB_SECRET: &str =
-        "7276533ce3c89f04a007c2e8aa7d2e3b36829d0eaab5631347d8336c2da09a8e";
+    pub const X0_SECRET: &str = "1008f2c706ae2157c75e41b2d75695c7bf480d0632a1ef447036cafe4cabb021";
+    pub const X1_SECRET: &str = "526e009578f6f25fdec992343f09f5e6c58489c31fcf8a934bbaf85797121bdd";
+    pub const X2_SECRET: &str = "549075ccd3d1c36b3546725c43e71943414409a23b980b2c47a3fc2b9c37679b";
+    pub const XB_SECRET: &str = "7276533ce3c89f04a007c2e8aa7d2e3b36829d0eaab5631347d8336c2da09a8e";
     pub const X0_PUBLIC: &str =
         "03bad54cc48293ef3472ac1ada55c9c9fdb3eb99ee47369bbe1d3ce46b300cd7b3";
     pub const X1_PUBLIC: &str =
@@ -382,40 +377,27 @@ mod vectors {
     pub const X2_PUBLIC: &str =
         "031d16ef08ede5a347e94a8eca071bec7bedb9d8ba943d24bde912a4e1578e529b";
 
-    pub const M1: &str =
-        "141c4ca5e614af8e5e323eb47a7e7673ebb67caf49dfa8e109f45f231227f7a0";
-    pub const M2: &str =
-        "911fb315257d9ae29d47ecb48c6fa27074dee6860a0489f8db6ac9a486be6a3e";
-    pub const R1: &str =
-        "5c183d2dea942eb2780afb90cfd94983ae6575d60e350021c8c93008ac503973";
-    pub const R2: &str =
-        "044d4a5b5daf00dd1fb4444ca2f8c3facc95d537d5ad0e0a2815c912e98a431d";
-    pub const M1_ENC: &str =
-        "033fe5d950712f711e5d292d68f804fad4c35fb7f3f1866516448647d4aab12590";
-    pub const M2_ENC: &str =
-        "026502a833ed1d972ee27175e750b1719adee12726c653125887c0d32b1f3747ab";
-    pub const REQUEST_PROOF: &str =
-        "2a088673e302502a3dc80d6100a1bb709083ac7b31da34f9a7c52e7cfeaa2ea30b7341133086e64b79dfc6cdac9f348ddbed0b087746f0167ea238d3ddf17e613880b73e85f499c7eddc6555355ea71487b49862400091b5b32cb219d7104f571306bc6f2487bab299bb2e9a1078dee94d83b6536ed570f8114ee9c97b8b602bfacbeb3764f6a22915a19c24895a6bf7048c663337f7690f0182a1f866586d9e";
+    pub const M1: &str = "141c4ca5e614af8e5e323eb47a7e7673ebb67caf49dfa8e109f45f231227f7a0";
+    pub const M2: &str = "911fb315257d9ae29d47ecb48c6fa27074dee6860a0489f8db6ac9a486be6a3e";
+    pub const R1: &str = "5c183d2dea942eb2780afb90cfd94983ae6575d60e350021c8c93008ac503973";
+    pub const R2: &str = "044d4a5b5daf00dd1fb4444ca2f8c3facc95d537d5ad0e0a2815c912e98a431d";
+    pub const M1_ENC: &str = "033fe5d950712f711e5d292d68f804fad4c35fb7f3f1866516448647d4aab12590";
+    pub const M2_ENC: &str = "026502a833ed1d972ee27175e750b1719adee12726c653125887c0d32b1f3747ab";
+    pub const REQUEST_PROOF: &str = "2a088673e302502a3dc80d6100a1bb709083ac7b31da34f9a7c52e7cfeaa2ea30b7341133086e64b79dfc6cdac9f348ddbed0b087746f0167ea238d3ddf17e613880b73e85f499c7eddc6555355ea71487b49862400091b5b32cb219d7104f571306bc6f2487bab299bb2e9a1078dee94d83b6536ed570f8114ee9c97b8b602bfacbeb3764f6a22915a19c24895a6bf7048c663337f7690f0182a1f866586d9e";
 
     pub const RESPONSE_U: &str =
         "021cf52318c97c33472cc8fb42a5b5a774f83c3b36e6c782209d53e5945d99a493";
     pub const ENC_U_PRIME: &str =
         "02ae23020d5427c7f785a72d77c24997f955e66ab7c378c334b7c259dabdf572d7";
-    pub const X0_AUX: &str =
-        "031523abe64e436e65e592abdae322dc556fcbea707757e18d4160ba57d574cd87";
-    pub const X1_AUX: &str =
-        "023cc3b53807f6e0082b675794ae9f6b370483ca5a3e6d688c3b81f2fdb6d4ec00";
-    pub const X2_AUX: &str =
-        "0329dc7c93f8a231a1f16ec69f0fba446e022ce69945b20f37386a7fda3e573b79";
-    pub const H_AUX: &str =
-        "0389746891b6dbf062511619eae7d72ae87630bea1e277a925708fdfef8363a1d4";
-    pub const RESPONSE_PROOF: &str =
-        "ec342aee0d481435379ea6bbe919edd5d2eb9c12198a083e0e899da1f14dbc46a8048f5a12c5cae21e5f5949fe08d1c15c266c63544615400def4ce9a6cf8aee32052ced26e7a9d854f2c45ea23ffea0f6bf977f6155d412991abc0e2d1ad83504129c1ac8319b2a45940c52c4b41bde80969313641b9cb727445e20b44d0ea884e9b180cd152442883038b97d72772201f281d76a18d22e374bd989accd76548067399162428c4d25daf1b7f68f3580a38cc4564a88f28494649064500f06c5b946dde032a389f8fe337605627ce91a92c20db911100a2c7c42ae15fde5a5cbd9d078b819a80423593192c40d70ce77f1a6d377770fe5c05781782bd1eaa43f";
+    pub const X0_AUX: &str = "031523abe64e436e65e592abdae322dc556fcbea707757e18d4160ba57d574cd87";
+    pub const X1_AUX: &str = "023cc3b53807f6e0082b675794ae9f6b370483ca5a3e6d688c3b81f2fdb6d4ec00";
+    pub const X2_AUX: &str = "0329dc7c93f8a231a1f16ec69f0fba446e022ce69945b20f37386a7fda3e573b79";
+    pub const H_AUX: &str = "0389746891b6dbf062511619eae7d72ae87630bea1e277a925708fdfef8363a1d4";
+    pub const RESPONSE_PROOF: &str = "ec342aee0d481435379ea6bbe919edd5d2eb9c12198a083e0e899da1f14dbc46a8048f5a12c5cae21e5f5949fe08d1c15c266c63544615400def4ce9a6cf8aee32052ced26e7a9d854f2c45ea23ffea0f6bf977f6155d412991abc0e2d1ad83504129c1ac8319b2a45940c52c4b41bde80969313641b9cb727445e20b44d0ea884e9b180cd152442883038b97d72772201f281d76a18d22e374bd989accd76548067399162428c4d25daf1b7f68f3580a38cc4564a88f28494649064500f06c5b946dde032a389f8fe337605627ce91a92c20db911100a2c7c42ae15fde5a5cbd9d078b819a80423593192c40d70ce77f1a6d377770fe5c05781782bd1eaa43f";
 
     pub const CREDENTIAL_M1: &str = M1;
     pub const CREDENTIAL_U: &str = RESPONSE_U;
-    pub const U_PRIME: &str =
-        "02646199272c28911165b4d1c5f4ffbd8a83f686948fd4c7250e28c81dbfecd354";
+    pub const U_PRIME: &str = "02646199272c28911165b4d1c5f4ffbd8a83f686948fd4c7250e28c81dbfecd354";
     pub const CREDENTIAL_X1: &str = X1_PUBLIC;
 
     pub const P1: ExpectedPresentation = ExpectedPresentation {

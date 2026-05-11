@@ -60,8 +60,10 @@ impl Element {
         }
 
         let encoded = EncodedPoint::from_bytes(bytes).map_err(|_| ArcError::InvalidElement)?;
-        let affine =
-            ct_option_to_result(AffinePoint::from_encoded_point(&encoded), ArcError::InvalidElement)?;
+        let affine = ct_option_to_result(
+            AffinePoint::from_encoded_point(&encoded),
+            ArcError::InvalidElement,
+        )?;
         if bool::from(affine.is_identity()) {
             return Err(ArcError::InvalidElement);
         }
@@ -198,11 +200,8 @@ pub fn hash_to_group(input: &[u8], info: &[u8]) -> Result<Element> {
 
 pub fn hash_to_scalar(input: &[u8], info: &[u8]) -> Result<Scalar> {
     let dst = dst(b"HashToScalar-", info);
-    <NistP256 as GroupDigest>::hash_to_scalar::<ExpandMsgXmd<Sha256>>(
-        &[input],
-        &[dst.as_slice()],
-    )
-    .map_err(|_| ArcError::InvalidScalar)
+    <NistP256 as GroupDigest>::hash_to_scalar::<ExpandMsgXmd<Sha256>>(&[input], &[dst.as_slice()])
+        .map_err(|_| ArcError::InvalidScalar)
 }
 
 pub(crate) fn serialize_elements(elements: &[Element]) -> Result<Vec<u8>> {

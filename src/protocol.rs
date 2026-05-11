@@ -361,7 +361,9 @@ impl PresentationState {
     }
 }
 
-pub fn setup_server<R: RngCore + ?Sized>(rng: &mut R) -> Result<(ServerPrivateKey, ServerPublicKey)> {
+pub fn setup_server<R: RngCore + ?Sized>(
+    rng: &mut R,
+) -> Result<(ServerPrivateKey, ServerPublicKey)> {
     let x0 = random_scalar(rng);
     let x1 = random_scalar(rng);
     let x2 = random_scalar(rng);
@@ -424,7 +426,9 @@ pub fn respond_credential<R: RngCore + ?Sized>(
 
     let b = random_scalar(rng);
     let u = generator_g().mul(b);
-    let enc_u_prime = (public_key.x0 + request.m1_enc.mul(private_key.x1) + request.m2_enc.mul(private_key.x2)).mul(b);
+    let enc_u_prime =
+        (public_key.x0 + request.m1_enc.mul(private_key.x1) + request.m2_enc.mul(private_key.x2))
+            .mul(b);
     let x0_aux = generator_h().mul(b * private_key.x0_blinding);
     let x1_aux = public_key.x1.mul(b);
     let x2_aux = public_key.x2.mul(b);
@@ -499,10 +503,7 @@ pub fn verify_presentation(
     Ok((valid, presentation.tag))
 }
 
-pub(crate) fn credential_request_statement(
-    m1_enc: Element,
-    m2_enc: Element,
-) -> Result<LinearRelation> {
+fn credential_request_statement(m1_enc: Element, m2_enc: Element) -> Result<LinearRelation> {
     let mut statement = LinearRelation::new();
     let [m1_var, m2_var, r1_var, r2_var] = statement.allocate_scalars();
     let [gen_g_var, gen_h_var, m1_enc_var, m2_enc_var] = statement.allocate_elements();
@@ -541,8 +542,7 @@ fn credential_response_statement(
     response: &CredentialResponse,
 ) -> Result<LinearRelation> {
     let mut statement = LinearRelation::new();
-    let [x0_var, x1_var, x2_var, xb_var, b_var, t1_var, t2_var] =
-        statement.allocate_scalars();
+    let [x0_var, x1_var, x2_var, xb_var, b_var, t1_var, t2_var] = statement.allocate_scalars();
     let [
         gen_g_var,
         gen_h_var,
@@ -587,7 +587,11 @@ fn credential_response_statement(
     statement.append_equation(u_var, &[(b_var, gen_g_var)]);
     statement.append_equation(
         enc_u_prime_var,
-        &[(b_var, x0_var_el), (t1_var, m1_enc_var), (t2_var, m2_enc_var)],
+        &[
+            (b_var, x0_var_el),
+            (t1_var, m1_enc_var),
+            (t2_var, m2_enc_var),
+        ],
     );
     Ok(statement)
 }
@@ -637,8 +641,7 @@ fn presentation_statement(
     presentation_limit: u64,
 ) -> Result<(LinearRelation, bool)> {
     let mut statement = LinearRelation::new();
-    let [m1_var, z_var, r_neg_var, nonce_var, nonce_blinding_var] =
-        statement.allocate_scalars();
+    let [m1_var, z_var, r_neg_var, nonce_var, nonce_blinding_var] = statement.allocate_scalars();
     let [
         gen_g_var,
         gen_h_var,
@@ -722,13 +725,7 @@ fn make_presentation_proof<R: RngCore + ?Sized>(
         rng,
     )?;
 
-    let mut witness = vec![
-        credential.m1,
-        z,
-        -r,
-        Scalar::from(nonce),
-        nonce_blinding,
-    ];
+    let mut witness = vec![credential.m1, z, -r, Scalar::from(nonce), nonce_blinding];
     witness.append(&mut range_witness);
 
     let proof_bytes = prove(

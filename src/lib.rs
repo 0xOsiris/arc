@@ -14,9 +14,9 @@ pub use group::{
 };
 pub use protocol::{
     ClientSecrets, Credential, CredentialRequest, CredentialResponse, Presentation,
-    PresentationProof, PresentationState, ServerPrivateKey, ServerPublicKey,
-    finalize_credential, request_credential, respond_credential, setup_server,
-    verify_credential_request, verify_credential_response, verify_presentation,
+    PresentationProof, PresentationState, ServerPrivateKey, ServerPublicKey, finalize_credential,
+    request_credential, respond_credential, setup_server, verify_credential_request,
+    verify_credential_response, verify_presentation,
 };
 
 #[cfg(test)]

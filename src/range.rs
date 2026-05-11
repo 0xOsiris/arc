@@ -14,7 +14,9 @@ pub(crate) fn compute_bases(presentation_limit: u64) -> Result<Vec<u64>> {
     let mut bases = Vec::with_capacity(num_bits as usize);
 
     for i in 0..(num_bits - 1) {
-        let base = 1u64.checked_shl(i).ok_or(ArcError::InvalidPresentationLimit)?;
+        let base = 1u64
+            .checked_shl(i)
+            .ok_or(ArcError::InvalidPresentationLimit)?;
         remainder = remainder
             .checked_sub(base)
             .ok_or(ArcError::InvalidPresentationLimit)?;
@@ -148,7 +150,10 @@ fn append_range_constraints(
 
     for i in 0..num_bits {
         statement.append_equation(vars_d[i], &[(vars_b[i], gen_g_var), (vars_s[i], gen_h_var)]);
-        statement.append_equation(vars_d[i], &[(vars_b[i], vars_d[i]), (vars_s2[i], gen_h_var)]);
+        statement.append_equation(
+            vars_d[i],
+            &[(vars_b[i], vars_d[i]), (vars_s2[i], gen_h_var)],
+        );
     }
 
     Ok(())

@@ -1,5 +1,5 @@
-use sha3::digest::{ExtendableOutput, Update, XofReader};
 use sha3::Shake128;
+use sha3::digest::{ExtendableOutput, Update, XofReader};
 
 use crate::error::{ArcError, Result};
 use crate::group::{
@@ -105,7 +105,10 @@ impl LinearRelation {
     }
 
     pub(crate) fn image(&self) -> Result<Vec<Element>> {
-        self.image.iter().map(|index| self.element(*index)).collect()
+        self.image
+            .iter()
+            .map(|index| self.element(*index))
+            .collect()
     }
 
     fn element(&self, index: usize) -> Result<Element> {
@@ -115,7 +118,7 @@ impl LinearRelation {
             .ok_or(ArcError::MalformedStatement)
     }
 
-    pub(crate) fn instance_label(&self) -> Result<Vec<u8>> {
+    fn instance_label(&self) -> Result<Vec<u8>> {
         if self.group_elements.iter().any(Option::is_none) {
             return Err(ArcError::MalformedStatement);
         }
@@ -137,7 +140,11 @@ impl LinearRelation {
         }
 
         for element in &self.group_elements {
-            out.extend_from_slice(&element.ok_or(ArcError::MalformedStatement)?.try_to_bytes()?);
+            out.extend_from_slice(
+                &element
+                    .ok_or(ArcError::MalformedStatement)?
+                    .try_to_bytes()?,
+            );
         }
 
         Ok(out)
@@ -180,11 +187,7 @@ pub(crate) fn prove<R: RngCore + ?Sized>(
     Ok(proof)
 }
 
-pub(crate) fn verify(
-    session: &[u8],
-    statement: &LinearRelation,
-    proof: &[u8],
-) -> Result<bool> {
+pub(crate) fn verify(session: &[u8], statement: &LinearRelation, proof: &[u8]) -> Result<bool> {
     let expected = (1 + statement.num_scalars()) * NS;
     if proof.len() != expected {
         return Err(ArcError::InvalidProofLength {
